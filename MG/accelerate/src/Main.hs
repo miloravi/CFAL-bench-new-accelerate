@@ -1,7 +1,7 @@
 module Main where
 import Data.Array.Accelerate
 import qualified Data.Array.Accelerate.LLVM.Native as CPU
-import qualified Data.Array.Accelerate.LLVM.PTX    as GPU
+-- import qualified Data.Array.Accelerate.LLVM.PTX    as GPU
 import Criterion
 import Criterion.Main
 import qualified Criterion.Measurement as Cr
@@ -12,9 +12,9 @@ import Prelude (IO, print, putStrLn, mapM_)
 
 main :: IO ()
 main = do
-  once "CPU" CPU.runN
-  once "GPU" GPU.runN
-  defaultMain [backend "CPU" CPU.runN, backend "GPU" GPU.runN]
+  -- once "CPU" CPU.runN
+  -- once "GPU" GPU.runN
+  defaultMain [backend "CPU" CPU.runN{-, backend "GPU" GPU.runN-}]
   where
     once nm rn = do
       putStrLn nm

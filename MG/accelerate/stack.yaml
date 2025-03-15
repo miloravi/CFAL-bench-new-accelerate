@@ -2,17 +2,23 @@ resolver: lts-21.4
 
 extra-deps:
 - github: acceleratehs/accelerate
-  commit: 17466411109170c4e4361d9980f1cded0eb85efb
+  commit: 2524e84dc0dfac61ba1197ba8c4e5d3d99a95937
 - github: acceleratehs/accelerate-llvm
-  commit: 2b5d69448557e89002c0179ea1aaf59bb757a6e3
+  commit: c025f0a5c506432e3877b7f3fcbd53cbec4a67e5
   subdirs: 
   - accelerate-llvm
   - accelerate-llvm-native
   - accelerate-llvm-ptx
-- cuda-0.11.0.1
-- nvvm-0.10.0.1
+# - cuda-0.11.0.1
+# - nvvm-0.10.0.1
 - github: llvm-hs/llvm-hs
   commit: e4b3cfa47e72f094ab109884f18acfc666b0fb7d  # llvm-15
   subdirs:
     - llvm-hs
     - llvm-hs-pure
+- github: msakai/haskell-MIP
+  commit: 4295aa21a24a30926b55770c55ac00f749fb8a39
+  subdirs:
+  - MIP
+- OptDir-0.0.4
+- bytestring-encoding-0.1.2.0
