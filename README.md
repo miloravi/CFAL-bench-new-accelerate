@@ -1,34 +1,3 @@
-# CFAL-bench
+# CFAL benchmarks in the new version of Accelerate
 
-This is the repository containing the benchmark work related to the upcoming collaborative paper "Comparing Functional Array Languages: Programming and GPU Performance"
-
-
-## Benchmark Collection
-
-In order to suggest a new benchmark, please do perform the following steps:
-
-* choose an acronym
-* create a subdirectory of that name
-* add a Readme.md which contains:
-   * a short description what it does / implements, highlighting the envisioned challenges
-   * some rationale, why you think it is suitable for what we want to investigate
-   * some rationale, why you believe that the wider community may accept this as a BM
-   * pointers to related materials (papers / existing implementations)
-* add a naive implementation which others can use to determine what is actually involved.
-  This can be in any programming language but it should be small enough to allow for a quick
-  assessment even if people are *not* familiar with the language used
-* add the acronym into the table below and indicate what is available so far; the column "inclusion in CFAL"
-  indicates whether there exists a consensus amongst us to include this BM. The language specific columns
-  currently should only include whether an implementation in that language has been uploaded or not, it is not meant
-  to indicate whether a super efficient one has been put there
-
-## Benchmark Status
-
-| BM name     | description | seq/par baselines | inclusion in CFAL   | Accelerate | APL | DaCe   | Futhark | SaC |
-| ----------- | ----------- | ----------------- | ------------------- | ---------- | --- | ------ | ------- | --- |
-| MG          | done        | GPU, Fortran, SAC | YES                 | YES        | YES | YES    | YES     | YES |
-| nbody-naive | done        | Seq C             | YES                 | YES        | YES | YES    | YES     | YES |
-| LocVolCalib | done        | GPU,OMP, Haskell  | YES                 |            | YES | Almost | YES     | YES |
-| Quickhull   | done        | PBBS             | YES                 | YES        | YES |        | YES     | Multiple |
-| FlashAttention | done     | Seq/MC C?         | YES                 | YES        | YES | YES    |         | YES |
-
+This repository contains implementations of the [CFAL benchmarks](https://github.com/diku-dk/CFAL-bench) in the new, currently unreleased, version of Accelerate. Benchmarks nbody-naive and MG are adapted to the new version of Accelerate. A version of quickhull is available at [ivogabe/quickhull-benchmarks](https://github.com/ivogabe/quickhull-benchmarks), where we also experimented with more variants of Quickhull. In contrast to the original implementation for CFAL, which is entirely flattened, we also have partially flattened variants.
