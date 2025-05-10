@@ -5,6 +5,56 @@
 
 packages:
 - completed:
+    name: accelerate
+    pantry-tree:
+      sha256: 201201e5e71cb43eda0a33d8cf6ce000df09e57a5456965e3b5c5babacc47ecb
+      size: 24736
+    sha256: 2bf25415c10957e14b763e2d32cba081b3dc3a269e82fe9045f106d76f44e536
+    size: 934755
+    url: https://github.com/acceleratehs/accelerate/archive/2524e84dc0dfac61ba1197ba8c4e5d3d99a95937.tar.gz
+    version: 1.3.0.0
+  original:
+    url: https://github.com/acceleratehs/accelerate/archive/2524e84dc0dfac61ba1197ba8c4e5d3d99a95937.tar.gz
+- completed:
+    name: accelerate-llvm
+    pantry-tree:
+      sha256: 4ec26f56430b86de6a0e60016d133dbcaaf5e910bca6a2e8b5a31daef4286b53
+      size: 5937
+    sha256: 7a03f90645d5ebb56c623cbb3c9657666550a1f6f88146d712a91efd39820657
+    size: 20259922
+    subdir: accelerate-llvm
+    url: https://github.com/acceleratehs/accelerate-llvm/archive/c025f0a5c506432e3877b7f3fcbd53cbec4a67e5.tar.gz
+    version: 1.3.0.0
+  original:
+    subdir: accelerate-llvm
+    url: https://github.com/acceleratehs/accelerate-llvm/archive/c025f0a5c506432e3877b7f3fcbd53cbec4a67e5.tar.gz
+- completed:
+    name: accelerate-llvm-native
+    pantry-tree:
+      sha256: 3cba660ed4147c840c22c95f74cdc17c9aa5fc5972cad20bbf9a1f69ebacc5ae
+      size: 6562
+    sha256: 7a03f90645d5ebb56c623cbb3c9657666550a1f6f88146d712a91efd39820657
+    size: 20259922
+    subdir: accelerate-llvm-native
+    url: https://github.com/acceleratehs/accelerate-llvm/archive/c025f0a5c506432e3877b7f3fcbd53cbec4a67e5.tar.gz
+    version: 1.3.0.0
+  original:
+    subdir: accelerate-llvm-native
+    url: https://github.com/acceleratehs/accelerate-llvm/archive/c025f0a5c506432e3877b7f3fcbd53cbec4a67e5.tar.gz
+- completed:
+    name: accelerate-llvm-ptx
+    pantry-tree:
+      sha256: 96f61a8517b3ba6f0c50e7b2bf07f3ccb8541b113d71efa50c21ddccab8cfeba
+      size: 4967
+    sha256: 7a03f90645d5ebb56c623cbb3c9657666550a1f6f88146d712a91efd39820657
+    size: 20259922
+    subdir: accelerate-llvm-ptx
+    url: https://github.com/acceleratehs/accelerate-llvm/archive/c025f0a5c506432e3877b7f3fcbd53cbec4a67e5.tar.gz
+    version: 1.3.0.0
+  original:
+    subdir: accelerate-llvm-ptx
+    url: https://github.com/acceleratehs/accelerate-llvm/archive/c025f0a5c506432e3877b7f3fcbd53cbec4a67e5.tar.gz
+- completed:
     name: llvm-hs
     pantry-tree:
       sha256: 21f74a6f51fae6c0a0fcf3e6620a59f341289ac743998b41ed3276fd1b7d8862

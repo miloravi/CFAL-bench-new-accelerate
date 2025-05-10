@@ -1,17 +1,15 @@
 resolver: lts-21.4
 
 extra-deps:
-#- github: acceleratehs/accelerate
-#  commit: 2524e84dc0dfac61ba1197ba8c4e5d3d99a95937
-#- github: acceleratehs/accelerate-llvm
-#  commit: c025f0a5c506432e3877b7f3fcbd53cbec4a67e5
-#  subdirs: 
-#  - accelerate-llvm
-#  - accelerate-llvm-native
-#  - accelerate-llvm-ptx
-- ../../../../code/accelerate
-- ../../../../code/accelerate-llvm/accelerate-llvm
-- ../../../../code/accelerate-llvm/accelerate-llvm-native
+- github: acceleratehs/accelerate
+  commit: 2524e84dc0dfac61ba1197ba8c4e5d3d99a95937
+- github: acceleratehs/accelerate-llvm
+  commit: c025f0a5c506432e3877b7f3fcbd53cbec4a67e5
+  subdirs: 
+  - accelerate-llvm
+  - accelerate-llvm-native
+  - accelerate-llvm-ptx
+
 # - cuda-0.11.0.1
 # - nvvm-0.10.0.1
 - github: llvm-hs/llvm-hs
