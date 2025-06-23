@@ -17,7 +17,6 @@ executable quickhull
                     accelerate-llvm,
                     accelerate-llvm-native,
                     -- accelerate-llvm-ptx,
-                    accelerate-io,
                     llvm-pretty,
                     -- cuda,
                     -- nvvm,
