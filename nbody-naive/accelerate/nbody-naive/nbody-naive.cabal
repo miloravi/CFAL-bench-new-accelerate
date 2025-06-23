@@ -19,7 +19,7 @@ executable nbody-naive
                     accelerate-llvm,
                     accelerate-llvm-native,
                     -- accelerate-llvm-ptx,
-                    llvm-hs,
+                    llvm-pretty,
                     -- cuda,
                     -- nvvm,
                     criterion,
