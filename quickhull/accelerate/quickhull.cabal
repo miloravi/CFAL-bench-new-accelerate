@@ -16,11 +16,11 @@ executable quickhull
                     accelerate >= 1.3.0.0,
                     accelerate-llvm,
                     accelerate-llvm-native,
-                    accelerate-llvm-ptx,
+                    -- accelerate-llvm-ptx,
                     accelerate-io,
-                    llvm-hs,
-                    cuda,
-                    nvvm,
+                    llvm-pretty,
+                    -- cuda,
+                    -- nvvm,
                     criterion,
                     bytestring
   hs-source-dirs:   src

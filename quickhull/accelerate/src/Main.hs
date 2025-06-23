@@ -3,7 +3,7 @@
 module Main where
 import qualified Data.Array.Accelerate as A
 import qualified Data.Array.Accelerate.LLVM.Native as CPU
-import qualified Data.Array.Accelerate.LLVM.PTX    as GPU
+-- import qualified Data.Array.Accelerate.LLVM.PTX    as GPU
 import Criterion
 import Criterion.Main
 
@@ -20,11 +20,11 @@ main = do
   inputs <- mapM load ["1M_rectangle", "1M_circle", "1M_quadratic", "100M_rectangle", "100M_circle", "100M_quadratic"]
 
   let quickhullCPU = CPU.runN quickhull
-  let quickhullGPU = GPU.runN quickhull
+  -- let quickhullGPU = GPU.runN quickhull
 
-  mapM_ (\input -> mapM_ (`testInput` input) [("CPU", quickhullCPU), ("GPU", quickhullGPU)]) inputs
+  mapM_ (\input -> mapM_ (`testInput` input) [("CPU", quickhullCPU){-, ("GPU", quickhullGPU) -}]) inputs
 
-  defaultMain [backend "CPU" quickhullCPU inputs, backend "GPU" quickhullGPU inputs]
+  defaultMain [backend "CPU" quickhullCPU inputs {-, backend "GPU" quickhullGPU inputs -}]
   where
     backend name quickhull' inputs
       = bgroup name
