@@ -14,10 +14,10 @@ executable locvolcalib
   build-depends:    base >= 4.10,
                     accelerate >= 1.3.0.0,
                     lens-accelerate,
-                    -- accelerate-llvm,
-                    -- accelerate-llvm-native,
+                    accelerate-llvm,
+                    accelerate-llvm-native,
                     -- accelerate-llvm-ptx,
-                    -- llvm-hs,
+                    llvm-pretty,
                     -- cuda,
                     -- nvvm,
                     criterion
