@@ -13,7 +13,7 @@ import Prelude hiding (sum)
 -- currently does NOT work: returns only NaNs. Not sure why, it seems like a faithful translation from Futhark.
 main :: IO ()
 main = --print $ Interp.runN main' (fromList Z $ pure $ Prelude.snd $ small) 
-  defaultMain [backend "CPU" CPU.runN, {- backend "GPU" GPU.runN -}]
+  defaultMain [backend "CPU" CPU.runN {- , backend "GPU" GPU.runN -}]
     where
       backend name run = bgroup name $ map (benchrun run) [small, medium, large]
       benchrun run (name, input) = bench name $ nf (run main') (fromList Z $ pure input)
