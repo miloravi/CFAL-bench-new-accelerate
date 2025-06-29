@@ -85,12 +85,13 @@ bench() {
     local extra_flags="$5"
 
     # Remove old results files
-    rm -f results/results-$name-*.csv
     rm -r results/benchmark_*.csv
 
     for pkg in "${PACKAGES[@]}"; do
       name="${PKG_NAMES[$pkg]}"
       
+      rm -f results/results-$name-*.csv
+
       echo "Benching $name"
 
       mkdir -p results
