@@ -2,12 +2,17 @@
 [[ -n "${CFAL_COMMON_SOURCED:-}" ]] && return 0
 CFAL_COMMON_SOURCED=1
 
+# Names of folders containing accelerate-llvm and accelerate-llvm-native
 PACKAGES=(accelerate-llvm-old accelerate-llvm)
 
+# Name of the accelerate-llvm variant that will be displayed in results
 declare -A PKG_NAMES=(
   [accelerate-llvm-old]="old"
   [accelerate-llvm]="new"
 )
+
+# Thread counts to benchmark
+THREAD_COUNTS=(1 4 8 12 16 20 24 28 32)
 
 parse_flags() {
     TIMER_FALLBACK=""
@@ -35,12 +40,12 @@ parse_flags() {
 create_temp_stack_yaml() {
     local pkg="$1"
     local path="$2"
-    local timer_fallback="$3"
-    local debug="$4"
-    local extra_packages="$5"
-    local extra_deps="$6"
-    local extra_flags="$7"
+    local extra_packages="$3"
+    local extra_deps="$4"
+    local extra_flags="$5"
     
+    parse_flags "$@"
+
     cat > temp-stack.yaml <<EOF
 snapshot:
   url: https://raw.githubusercontent.com/commercialhaskell/stackage-snapshots/master/lts/21/25.yaml
@@ -70,4 +75,77 @@ $timer_fallback
 
 $debug
 EOF
+}
+
+bench() {
+    local path="$1"
+    local bench_name="$2"
+    local extra_packages="$3"
+    local extra_deps="$4"
+    local extra_flags="$5"
+
+    # Remove old results files
+    rm -f results/results-$name-*.csv
+    rm -r results/benchmark_*.csv
+
+    for pkg in "${PACKAGES[@]}"; do
+      name="${PKG_NAMES[$pkg]}"
+      
+      echo "Benching $name"
+
+      mkdir -p results
+
+      # Create temp stack.yaml
+      create_temp_stack_yaml "$pkg" "$path" "$extra_packages" "$extra_deps" "$extra_flags" > temp-stack.yaml
+
+      for threads in "${THREAD_COUNTS[@]}"; do
+        echo "Benching with $threads threads"
+        
+        # Set thread count and run benchmark
+        export ACCELERATE_LLVM_NATIVE_THREADS=$threads
+        STACK_YAML=temp-stack.yaml stack run $bench_name -- --csv results/results-$name-$threads.csv
+        
+        # Add thread count column to CSV
+        if [ -f "results/results-$name-$threads.csv" ]; then
+
+          while IFS= read -r line; do
+            # Skip header line
+            if [[ $line == "Name,Mean,MeanLB,MeanUB,Stddev,StddevLB,StddevUB"* ]]; then
+                continue
+            fi
+            
+            # Skip empty lines
+            [[ -z "$line" ]] && continue
+            
+            # Extract benchmark name (first field)
+            benchmark_name=$(echo "$line" | cut -d',' -f1)
+            
+            file_name=$(echo "$benchmark_name" | sed 's/\//_/g' | sed 's/ /_/g')
+            output_file="results/benchmark_${file_name}.csv"
+            
+            # Create header if this is the first time writing to this file
+            if [ ! -f "$output_file" ]; then
+                echo "Name,Mean,MeanLB,MeanUB,Stddev,StddevLB,StddevUB,scheduler,threads" > "$output_file"
+            fi
+            
+            # Add the data line with package name and thread count
+            echo "${line},${name},${threads}" >> "$output_file"
+            
+        done < "results/results-$name-$threads.csv"
+
+      fi
+        
+      done
+      
+      # Clean up individual thread files
+      rm -f results/results-$name-*.csv
+
+      rm temp-stack.yaml
+      
+    done
+
+    echo "Benchmarks results saved in results folder"
+
+    unset ACCELERATE_LLVM_NATIVE_THREADS
+
 }
