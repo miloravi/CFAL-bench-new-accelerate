@@ -13,6 +13,7 @@ declare -A PKG_NAMES=(
 
 # Thread counts to benchmark
 THREAD_COUNTS=(1 4 8 12 16 20 24 28 32)
+# THREAD_COUNTS=(1 3 6)
 
 parse_flags() {
     TIMER_FALLBACK=""
@@ -84,8 +85,10 @@ bench() {
     local extra_deps="$4"
     local extra_flags="$5"
 
+    mkdir -p results
+
     # Remove old results files
-    rm -r results/benchmark_*.csv
+    rm -f results/benchmark_*.csv
 
     for pkg in "${PACKAGES[@]}"; do
       name="${PKG_NAMES[$pkg]}"
@@ -93,8 +96,6 @@ bench() {
       rm -f results/results-$name-*.csv
 
       echo "Benching $name"
-
-      mkdir -p results
 
       # Create temp stack.yaml
       create_temp_stack_yaml "$pkg" "$path" "$extra_packages" "$extra_deps" "$extra_flags" > temp-stack.yaml
@@ -104,7 +105,7 @@ bench() {
         
         # Set thread count and run benchmark
         export ACCELERATE_LLVM_NATIVE_THREADS=$threads
-        STACK_YAML=temp-stack.yaml stack run $bench_name -- --csv results/results-$name-$threads.csv
+        STACK_YAML=temp-stack.yaml stack run $bench_name -- --csv results/results-$name-$threads.csv --time-limit 300
         
         # Add thread count column to CSV
         if [ -f "results/results-$name-$threads.csv" ]; then
@@ -119,7 +120,16 @@ bench() {
             [[ -z "$line" ]] && continue
             
             # Extract benchmark name (first field)
-            benchmark_name=$(echo "$line" | cut -d',' -f1)
+            if [[ $line =~ ^\"([^\"]*)\", ]]; then
+                # In case the name is in quotes
+                benchmark_name="${BASH_REMATCH[1]}"
+            elif [[ $line =~ ^([^,]*), ]]; then
+                # In case the name is without quotes, stop at ','
+                benchmark_name="${BASH_REMATCH[1]}"
+            else
+                echo "Error: Unable to parse benchmark name from line: $line" >&2
+                exit 1
+            fi
             
             file_name=$(echo "$benchmark_name" | sed 's/\//_/g' | sed 's/ /_/g')
             output_file="results/benchmark_${file_name}.csv"
