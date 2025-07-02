@@ -1,3 +1,5 @@
+#!/bin/bash
+
 # Check if already sourced
 [[ -n "${CFAL_COMMON_SOURCED:-}" ]] && return 0
 CFAL_COMMON_SOURCED=1
@@ -12,8 +14,8 @@ declare -A PKG_NAMES=(
 )
 
 # Thread counts to benchmark
-THREAD_COUNTS=(1 4 8 12 16 20 24 28 32)
-# THREAD_COUNTS=(1 3 6)
+# THREAD_COUNTS=(1 4 8 12 16 20 24 28 32)
+THREAD_COUNTS=(1 3 6)
 
 parse_flags() {
     TIMER_FALLBACK=""
@@ -105,7 +107,7 @@ bench() {
         
         # Set thread count and run benchmark
         export ACCELERATE_LLVM_NATIVE_THREADS=$threads
-        STACK_YAML=temp-stack.yaml stack run $bench_name -- --csv results/results-$name-$threads.csv --time-limit 300
+        STACK_YAML=temp-stack.yaml stack run $bench_name -- --csv results/results-$name-$threads.csv --time-limit 30 --resamples 5
         
         # Add thread count column to CSV
         if [ -f "results/results-$name-$threads.csv" ]; then
@@ -158,5 +160,81 @@ bench() {
     echo "Benchmarks results saved in results folder"
 
     unset ACCELERATE_LLVM_NATIVE_THREADS
+}
 
+plot() {
+  local csv_file="$1"
+
+  # Check if file exists
+  if [ ! -f "$csv_file" ]; then
+      echo "Error: File '$csv_file' not found!"
+      exit 1
+  fi
+
+  basename=$(basename "$csv_file" .csv)
+  path=$(dirname "$csv_file")
+  output_file="${path}/${basename}.svg"
+
+  # Extract title information from filename
+  title=$(echo "$basename" | sed 's/_/ /g' | sed 's/benchmark //')
+
+  # Create temporary data files
+  old_data=$(mktemp)
+  new_data=$(mktemp)
+
+  # Extract data for old scheduler
+  awk -v FPAT='[^,]*|("([^"]|"")*")' -v OFS=',' 'NR>1 && NF>=9 && $8=="old" { print $9, $2, $5 }' "$csv_file" > "$old_data"
+
+  # Extract data for new scheduler
+  awk -v FPAT='[^,]*|("([^"]|"")*")' -v OFS=',' 'NR>1 && NF>=9 && $8=="new" { print $9, $2, $5 }' "$csv_file" > "$new_data"
+
+  # Debug: Check if data files have content
+  echo "=== Debug: Data file contents ==="
+  echo "Old data file contains:"
+  cat "$old_data"
+  echo "New data file contains:"
+  cat "$new_data"
+  echo "=========================="
+
+  # Create temporary gnuplot script
+  gnuplot_script=$(mktemp)
+
+  cat > "$gnuplot_script" << EOF
+  set terminal svg size 1200,800 enhanced font 'Arial,12'
+  set output '$output_file'
+
+  set title "$title Performance Comparison" font 'Arial,14'
+  set xlabel "Number of Threads"
+  set ylabel "Mean Execution Time (seconds)"
+
+  set grid
+  set key top right
+  set style line 1 linecolor rgb '#e41a1c' linewidth 2 pointtype 7 pointsize 1.2
+  set style line 2 linecolor rgb '#377eb8' linewidth 2 pointtype 5 pointsize 1.2
+
+  set lmargin 10
+  set rmargin 3
+  set tmargin 3
+  set bmargin 5
+
+  set datafile sep ','
+  # Plot using temporary data files
+  plot '$old_data' using 1:2:3 with errorbars linestyle 1 title "Old Scheduler", \\
+       '$old_data' using 1:2 with linespoints linestyle 1 notitle, \\
+       '$new_data' using 1:2:3 with errorbars linestyle 2 title "New Scheduler", \\
+       '$new_data' using 1:2 with linespoints linestyle 2 notitle
+
+EOF
+
+  # Run gnuplot
+  if command -v gnuplot >/dev/null 2>&1; then
+      gnuplot "$gnuplot_script"
+      echo "Plot saved as: $output_file"
+  else
+      echo "Error: gnuplot not found. Please install gnuplot first."
+      echo "On Ubuntu/Debian: sudo apt install gnuplot"
+      exit 1
+  fi
+
+  rm "$gnuplot_script" "$old_data" "$new_data"
 }
