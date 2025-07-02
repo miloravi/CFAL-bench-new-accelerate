@@ -117,12 +117,13 @@ bench() {
         
         # Set thread count and run benchmark
         export ACCELERATE_LLVM_NATIVE_THREADS=$threads
-        STACK_YAML=temp-stack.yaml stack run $bench_name -- --csv results/results-$name-$threads.csv --time-limit 30 --resamples 5
+        STACK_YAML=temp-stack.yaml stack run $bench_name -- --csv results/results-$name-$threads.csv --time-limit 10 --resamples 3
         
         # Add thread count column to CSV
         if [ -f "results/results-$name-$threads.csv" ]; then
 
           while IFS= read -r line; do
+            line=$(echo "$line" | tr -d '\n\r')
             # Skip header line
             if [[ $line == "Name,Mean,MeanLB,MeanUB,Stddev,StddevLB,StddevUB"* ]]; then
                 continue
