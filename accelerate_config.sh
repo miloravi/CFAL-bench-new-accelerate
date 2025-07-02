@@ -101,6 +101,7 @@ bench() {
 
     # Remove old results files
     rm -f results/benchmark_*.csv
+    rm -f results/benchmark_*.svg
 
     for pkg in "${PACKAGES[@]}"; do
       name="${PKG_NAMES[$pkg]}"
