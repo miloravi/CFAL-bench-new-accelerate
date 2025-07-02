@@ -13,9 +13,19 @@ declare -A PKG_NAMES=(
   [accelerate-llvm]="new"
 )
 
+declare -A PKG_COLORS=(
+  [accelerate-llvm-old]="#e41a1c"
+  [accelerate-llvm]="#377eb8"
+)
+
+declare -A PKG_POINTTYPE=(
+  [accelerate-llvm-old]="7"
+  [accelerate-llvm]="2"
+)
+
 # Thread counts to benchmark
-# THREAD_COUNTS=(1 4 8 12 16 20 24 28 32)
-THREAD_COUNTS=(1 3 6)
+THREAD_COUNTS=(1 4 8 12 16 20 24 28 32)
+# THREAD_COUNTS=(1 3 6)
 
 parse_flags() {
     TIMER_FALLBACK=""
@@ -74,9 +84,9 @@ extra-deps:
   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
 $extra_deps
 
-$timer_fallback
+$TIMER_FALLBACK
 
-$debug
+$DEBUG
 EOF
 }
 
@@ -142,8 +152,8 @@ bench() {
             fi
             
             # Add the data line with package name and thread count
-            echo "${line},${name},${threads}" >> "$output_file"
-            
+            printf "%s,%s,%s\n" "$line" "$name" "$threads" >> "$output_file"
+
         done < "results/results-$name-$threads.csv"
 
       fi
@@ -160,6 +170,12 @@ bench() {
     echo "Benchmarks results saved in results folder"
 
     unset ACCELERATE_LLVM_NATIVE_THREADS
+
+    for csv_file in results/benchmark_*.csv; do
+        if [ -f "$csv_file" ]; then
+            plot "$csv_file"
+        fi
+    done
 }
 
 plot() {
@@ -178,25 +194,26 @@ plot() {
   # Extract title information from filename
   title=$(echo "$basename" | sed 's/_/ /g' | sed 's/benchmark //')
 
-  # Create temporary data files
-  old_data=$(mktemp)
-  new_data=$(mktemp)
+  # Create temporary data files for each scheduler
+  declare -a data_files
+  declare -a plot_commands
 
-  # Extract data for old scheduler
-  awk -v FPAT='[^,]*|("([^"]|"")*")' -v OFS=',' 'NR>1 && NF>=9 && $8=="old" { print $9, $2, $5 }' "$csv_file" > "$old_data"
+  for pkg in "${PACKAGES[@]}"; do
+    name="${PKG_NAMES[$pkg]}"
+    color="${PKG_COLORS[$pkg]}"
+    pointtype="${PKG_POINTTYPE[$pkg]}"
 
-  # Extract data for new scheduler
-  awk -v FPAT='[^,]*|("([^"]|"")*")' -v OFS=',' 'NR>1 && NF>=9 && $8=="new" { print $9, $2, $5 }' "$csv_file" > "$new_data"
+    data_file=$(mktemp)
+    data_files+=("$data_file")
 
-  # Debug: Check if data files have content
-  echo "=== Debug: Data file contents ==="
-  echo "Old data file contains:"
-  cat "$old_data"
-  echo "New data file contains:"
-  cat "$new_data"
-  echo "=========================="
+    awk -v FPAT='[^,]*|("([^"]|"")*")' -v OFS=',' -v sched="$name" \
+        'NR>1 && NF>=9 && $8==sched { print $9, $2, $5 }' "$csv_file" > "$data_file"
 
-  # Create temporary gnuplot script
+    plot_commands+=("'$data_file' using 1:2:3 with errorbars linecolor rgb '$color' linewidth 2 pointtype $pointtype pointsize 1.2 title \"$name\"")
+    plot_commands+=("'$data_file' using 1:2 with linespoints linecolor rgb '$color' linewidth 2 pointtype $pointtype pointsize 1.2 notitle")
+
+  done
+
   gnuplot_script=$(mktemp)
 
   cat > "$gnuplot_script" << EOF
@@ -209,8 +226,6 @@ plot() {
 
   set grid
   set key top right
-  set style line 1 linecolor rgb '#e41a1c' linewidth 2 pointtype 7 pointsize 1.2
-  set style line 2 linecolor rgb '#377eb8' linewidth 2 pointtype 5 pointsize 1.2
 
   set lmargin 10
   set rmargin 3
@@ -219,10 +234,8 @@ plot() {
 
   set datafile sep ','
   # Plot using temporary data files
-  plot '$old_data' using 1:2:3 with errorbars linestyle 1 title "Old Scheduler", \\
-       '$old_data' using 1:2 with linespoints linestyle 1 notitle, \\
-       '$new_data' using 1:2:3 with errorbars linestyle 2 title "New Scheduler", \\
-       '$new_data' using 1:2 with linespoints linestyle 2 notitle
+  plot $(IFS=', \\'; echo "${plot_commands[*]}")
+
 
 EOF
 
@@ -236,5 +249,5 @@ EOF
       exit 1
   fi
 
-  rm "$gnuplot_script" "$old_data" "$new_data"
+    rm "$gnuplot_script" "${data_files[@]}"
 }
