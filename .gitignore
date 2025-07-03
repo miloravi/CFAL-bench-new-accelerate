@@ -27,3 +27,4 @@ Fin-LocVolCalib/baseline-FinPar/OrigCpp/VolCalib
 /FlashAttention/APL/build
 **/temp-stack.yaml
 **/temp-stack.yaml.lock
+**/results/results-*.csv

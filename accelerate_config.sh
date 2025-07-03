@@ -30,6 +30,7 @@ THREAD_COUNTS=(1 4 8 12 16 20 24 28 32)
 parse_flags() {
     TIMER_FALLBACK=""
     DEBUG=""
+    RESUME=false
     
     for arg in "$@"; do
         if [[ "$arg" == "--timer-fallback" ]]; then
@@ -46,6 +47,9 @@ parse_flags() {
   accelerate:
     debug: true
     tracy: true"
+        fi
+        if [[ "$arg" == "--resume" ]]; then
+            RESUME=true
         fi
     done
 }
@@ -97,31 +101,61 @@ bench() {
     local extra_deps="$4"
     local extra_flags="$5"
 
+    parse_flags "$@"
+
     mkdir -p results
 
-    # Remove old results files
-    rm -f results/benchmark_*.csv
-    rm -f results/benchmark_*.svg
+    if [ "$RESUME" = false ]; then
+      # Remove old results files
+      rm -f results/results-*.csv
+      rm -f results/benchmark_*.csv
+      rm -f results/benchmark_*.svg
+    fi
+
+    if [ "$RESUME" = true ]; then
+      # Check if results/results-*.csv files exist
+      results_files=$(ls results/results-*.csv 2>/dev/null)
+      # Check if results/benchmark_*.csv files exist
+      benchmark_files=$(ls results/benchmark_*.csv 2>/dev/null)
+      if [ -z "$results_files" ] && [ -n "$benchmark_files" ]; then
+        echo "Skipping benchmark $bench_name, results already exist."
+        return 0
+      fi
+    fi
+
 
     for pkg in "${PACKAGES[@]}"; do
       name="${PKG_NAMES[$pkg]}"
       
-      rm -f results/results-$name-*.csv
-
       echo "Benching $name"
 
       # Create temp stack.yaml
-      create_temp_stack_yaml "$pkg" "$path" "$extra_packages" "$extra_deps" "$extra_flags" > temp-stack.yaml
+      create_temp_stack_yaml "$pkg" "$path" "$extra_packages" "$extra_deps" "$extra_flags" "$@" > temp-stack.yaml
 
       for threads in "${THREAD_COUNTS[@]}"; do
+        if [ "$RESUME" = true ] && [ -f "results/results-$name-$threads.csv" ]; then
+          echo "Skipping $name with $threads threads, already exists"
+          continue
+        fi
+
         echo "Benching with $threads threads"
         
+        # Create temp file for results
+        temp_result_file=$(mktemp "/tmp/results-$name-$threads.XXXXXX.csv")
+        result_file="results/results-$name-$threads.csv"
+
         # Set thread count and run benchmark
         export ACCELERATE_LLVM_NATIVE_THREADS=$threads
-        STACK_YAML=temp-stack.yaml stack run $bench_name -- --csv results/results-$name-$threads.csv --time-limit 10 --resamples 3
-        
+        if STACK_YAML=temp-stack.yaml stack run $bench_name -- --csv $temp_result_file --time-limit 10 --resamples 3; then
+          mv "$temp_result_file" "$result_file"
+        else
+          rm -f "$temp_result_file"
+          echo "Benchmark failed for $name with $threads threads"
+          continue
+        fi
+
         # Add thread count column to CSV
-        if [ -f "results/results-$name-$threads.csv" ]; then
+        if [ -f "$final_result_file" ]; then
 
           while IFS= read -r line; do
             line=$(echo "$line" | tr -d '\n\r')
@@ -155,29 +189,26 @@ bench() {
             
             # Add the data line with package name and thread count
             printf "%s,%s,%s\n" "$line" "$name" "$threads" >> "$output_file"
-
         done < "results/results-$name-$threads.csv"
-
       fi
-        
       done
-      
-      # Clean up individual thread files
-      rm -f results/results-$name-*.csv
 
       rm temp-stack.yaml
-      
     done
+
+    # Clean up results files
+    rm -f results/results-*-*.csv
 
     echo "Benchmarks results saved in results folder"
 
     unset ACCELERATE_LLVM_NATIVE_THREADS
 
-    # Plot all results
+    # Make pretty plots for all results
     plot_all
 }
 
 plot_all() {
+  echo "Generating plots..."
   for csv_file in results/benchmark_*.csv; do
     if [ -f "$csv_file" ]; then
       plot "$csv_file"
