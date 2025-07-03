@@ -173,11 +173,17 @@ bench() {
 
     unset ACCELERATE_LLVM_NATIVE_THREADS
 
-    for csv_file in results/benchmark_*.csv; do
-        if [ -f "$csv_file" ]; then
-            plot "$csv_file"
-        fi
-    done
+    # Plot all results
+    plot_all
+}
+
+plot_all() {
+  for csv_file in results/benchmark_*.csv; do
+    if [ -f "$csv_file" ]; then
+      plot "$csv_file"
+    fi
+  done
+  echo "Plots saved in results folder"
 }
 
 plot() {
@@ -234,6 +240,9 @@ plot() {
   set tmargin 3
   set bmargin 5
 
+  set xrange [${THREAD_COUNTS[0]}:*]
+  set yrange [0:*]
+
   set datafile sep ','
   # Plot using temporary data files
   plot $(IFS=', \\'; echo "${plot_commands[*]}")
@@ -244,7 +253,6 @@ EOF
   # Run gnuplot
   if command -v gnuplot >/dev/null 2>&1; then
       gnuplot "$gnuplot_script"
-      echo "Plot saved as: $output_file"
   else
       echo "Error: gnuplot not found. Please install gnuplot first."
       echo "On Ubuntu/Debian: sudo apt install gnuplot"
