@@ -282,8 +282,9 @@ plot() {
   set tmargin 3
   set bmargin 5
 
-  set xrange [${THREAD_COUNTS[0]}:*]
+  set xrange [${THREAD_COUNTS[0]}:${THREAD_COUNTS[-1]}]
   set yrange [0:*]
+  set xtics ($(IFS=', '; echo "${THREAD_COUNTS[*]}"))
 
   set datafile sep ','
   # Plot using temporary data files
