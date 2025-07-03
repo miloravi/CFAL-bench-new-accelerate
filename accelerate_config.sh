@@ -31,6 +31,7 @@ parse_flags() {
     TIMER_FALLBACK=""
     DEBUG=""
     RESUME=false
+    REPLOT=false
     
     for arg in "$@"; do
         if [[ "$arg" == "--timer-fallback" ]]; then
@@ -50,6 +51,9 @@ parse_flags() {
         fi
         if [[ "$arg" == "--resume" ]]; then
             RESUME=true
+        fi
+        if [[ "$arg" == "--replot" ]]; then
+            REPLOT=true
         fi
     done
 }
@@ -104,6 +108,13 @@ bench() {
     parse_flags "$@"
 
     mkdir -p results
+
+    if [ "$REPLOT" = true ]; then
+      # Remove old plots
+      rm -f results/benchmark_*.svg
+      plot_all
+      return 0
+    fi
 
     if [ "$RESUME" = false ]; then
       # Remove old results files
