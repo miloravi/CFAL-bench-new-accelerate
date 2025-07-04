@@ -9,8 +9,8 @@ PACKAGES=(accelerate-llvm-old accelerate-llvm)
 
 # Name of the accelerate-llvm variant that will be displayed in results
 declare -A PKG_NAMES=(
-  [accelerate-llvm-old]="old"
-  [accelerate-llvm]="new"
+  [accelerate-llvm-old]="Self Scheduling (Current)"
+  [accelerate-llvm]="Sharded Self Scheduling"
 )
 
 declare -A PKG_COLORS=(
@@ -22,6 +22,8 @@ declare -A PKG_POINTTYPE=(
   [accelerate-llvm-old]="7"
   [accelerate-llvm]="2"
 )
+
+CRITERION_FLAGS="--time-limit 10 --resamples 3"
 
 # Thread counts to benchmark
 THREAD_COUNTS=(1 4 8 12 16 20 24 28 32)
@@ -157,7 +159,7 @@ bench() {
 
         # Set thread count and run benchmark
         export ACCELERATE_LLVM_NATIVE_THREADS=$threads
-        if STACK_YAML=temp-stack.yaml stack run $bench_name -- --csv $temp_result_file --time-limit 10 --resamples 3; then
+        if STACK_YAML=temp-stack.yaml stack run "$bench_name" -- --csv "$temp_result_file" "$CRITERION_FLAGS"; then
           mv "$temp_result_file" "$result_file"
         else
           rm -f "$temp_result_file"
