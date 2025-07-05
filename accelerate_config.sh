@@ -168,7 +168,7 @@ bench() {
         fi
 
         # Add thread count column to CSV
-        if [ -f "$final_result_file" ]; then
+        if [ -f "$result_file" ]; then
 
           while IFS= read -r line; do
             line=$(echo "$line" | tr -d '\n\r')
@@ -202,7 +202,7 @@ bench() {
             
             # Add the data line with package name and thread count
             printf "%s,%s,%s\n" "$line" "$name" "$threads" >> "$output_file"
-        done < "results/results-$name-$threads.csv"
+        done < "$result_file"
       fi
       done
 
