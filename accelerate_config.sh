@@ -159,7 +159,7 @@ bench() {
 
         # Set thread count and run benchmark
         export ACCELERATE_LLVM_NATIVE_THREADS=$threads
-        if STACK_YAML=temp-stack.yaml stack run "$bench_name" -- --csv "$temp_result_file" "$CRITERION_FLAGS"; then
+        if STACK_YAML=temp-stack.yaml stack run "$bench_name" -- --csv "$temp_result_file" $CRITERION_FLAGS; then
           mv "$temp_result_file" "$result_file"
         else
           rm -f "$temp_result_file"
