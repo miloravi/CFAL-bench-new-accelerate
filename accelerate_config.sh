@@ -5,25 +5,25 @@
 CFAL_COMMON_SOURCED=1
 
 # Names of folders containing accelerate-llvm and accelerate-llvm-native
-PACKAGES=(accelerate-llvm-old accelerate-llvm)
+PACKAGES=(accelerate-llvm accelerate-llvm-sharded)
 
 # Name of the accelerate-llvm variant that will be displayed in results
 declare -A PKG_NAMES=(
-  [accelerate-llvm-old]="Self Scheduling (Current)"
-  [accelerate-llvm]="Sharded Self Scheduling"
+  [accelerate-llvm]="Self Scheduling (Current)"
+  [accelerate-llvm-sharded]="Sharded Self Scheduling"
 )
 
 declare -A PKG_COLORS=(
-  [accelerate-llvm-old]="#e41a1c"
-  [accelerate-llvm]="#377eb8"
+  [accelerate-llvm]="#e41a1c"
+  [accelerate-llvm-sharded]="#377eb8"
 )
 
 declare -A PKG_POINTTYPE=(
-  [accelerate-llvm-old]="7"
-  [accelerate-llvm]="2"
+  [accelerate-llvm]="7"
+  [accelerate-llvm-sharded]="2"
 )
 
-CRITERION_FLAGS="--time-limit 10 --resamples 3"
+CRITERION_FLAGS=""
 
 # Thread counts to benchmark
 THREAD_COUNTS=(1 4 8 12 16 20 24 28 32)
@@ -106,6 +106,7 @@ bench() {
     local extra_packages="$3"
     local extra_deps="$4"
     local extra_flags="$5"
+    local criterion_flags="$6"
 
     parse_flags "$@"
 
@@ -159,7 +160,7 @@ bench() {
 
         # Set thread count and run benchmark
         export ACCELERATE_LLVM_NATIVE_THREADS=$threads
-        if STACK_YAML=temp-stack.yaml stack run "$bench_name" -- --csv "$temp_result_file" $CRITERION_FLAGS; then
+        if STACK_YAML=temp-stack.yaml stack run "$bench_name" -- --csv "$temp_result_file" "$criterion_flags" "$CRITERION_FLAGS"; then
           mv "$temp_result_file" "$result_file"
         else
           rm -f "$temp_result_file"

@@ -28,16 +28,13 @@ main = do
   gen <- R.create
   randomData1M <- replicateM 1000000 (R.uniformM gen :: IO Int)
   randomData100M <- replicateM 100000000 (R.uniformM gen :: IO Int)
-  randomData1B <- replicateM 1000000000 (R.uniformM gen :: IO Int)
   
   let inputs :: [(String, A.Vector Int)]
       inputs = [
         ("sequential-1M", A.fromList (A.Z A.:. 1000000) [0..]),
         ("sequential-100M", A.fromList (A.Z A.:. 100000000) [0..]),
-        ("sequential-1B", A.fromList (A.Z A.:. 1000000000) [0..]),
         ("random-1M", A.fromList (A.Z A.:. 1000000) randomData1M),
-        ("random-100M", A.fromList (A.Z A.:. 100000000) randomData100M),
-        ("random-1B", A.fromList (A.Z A.:. 1000000000) randomData1B)
+        ("random-100M", A.fromList (A.Z A.:. 100000000) randomData100M)
         ]
 
   foldl (\_ (_, v) -> v `deepseq` return ()) (return ()) inputs
