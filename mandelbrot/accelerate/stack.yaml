@@ -1,0 +1,28 @@
+resolver: lts-21.7
+
+extra-deps:
+- ../../../accelerate
+- ../../../accelerate-llvm/accelerate-llvm
+- ../../../accelerate-llvm/accelerate-llvm-native
+- github: tomsmeding/llvm-pretty
+  commit: a253a7fc1c62f4825ffce6b2507eebc5dadff32c
+- monadLib-3.10.3@sha256:026ba169762e63f0fe5f5c78829808f522a28730043bc3ad9b7c146baedf709f,637
+- MIP-0.2.0.0
+- OptDir-0.0.4
+- bytestring-encoding-0.1.2.0
+- acme-missiles-0.3
+- mwc-random-0.15.0.2
+- colour-accelerate-0.4.0.0
+
+# - github: ivogabe/accelerate
+#   commit: 2524e84dc0dfac61ba1197ba8c4e5d3d99a95937
+# - github: ivogabe/accelerate-llvm
+#   commit: c025f0a5c506432e3877b7f3fcbd53cbec4a67e5
+#   subdirs:
+#   - accelerate-llvm
+#   - accelerate-llvm-native
+# - github: llvm-hs/llvm-hs
+#   commit: e4b3cfa47e72f094ab109884f18acfc666b0fb7d  # llvm-15
+#   subdirs:
+#     - llvm-hs
+#     - llvm-hs-pure

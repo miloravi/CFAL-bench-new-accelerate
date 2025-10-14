@@ -19,6 +19,8 @@ quickhull/accelerate/.stack-work/*
 FlashAttention/accelerate/.stack-work/*
 LocVolCalib/accelerate/.stack-work/*
 folds/accelerate/.stack-work/*
+mandelbrot/accelerate/.stack-work/*
+primes/accelerate/.stack-work/*
 
 *.o
 Fin-LocVolCalib/baseline-FinPar/OrigCpp/Debug.txt
