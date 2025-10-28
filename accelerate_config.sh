@@ -5,29 +5,32 @@
 CFAL_COMMON_SOURCED=1
 
 # Names of folders containing accelerate-llvm and accelerate-llvm-native
-PACKAGES=(accelerate-llvm accelerate-llvm-sharded)
+PACKAGES=(accelerate-llvm accelerate-llvm-decoupled-lookback accelerate-llvm-decoupled-half-sized)
 
 # Name of the accelerate-llvm variant that will be displayed in results
 declare -A PKG_NAMES=(
-  [accelerate-llvm]="Self Scheduling (Current)"
-  [accelerate-llvm-sharded]="Sharded Self Scheduling"
+  [accelerate-llvm]="Default"
+  [accelerate-llvm-decoupled-lookback]="Decoupled Lookback"
+  [accelerate-llvm-decoupled-half-sized]="Decoupled Half-Sized"
 )
 
 declare -A PKG_COLORS=(
   [accelerate-llvm]="#e41a1c"
-  [accelerate-llvm-sharded]="#377eb8"
+  [accelerate-llvm-decoupled-lookback]="#377eb8"
+  [accelerate-llvm-decoupled-half-sized]="#4daf4a"
 )
 
 declare -A PKG_POINTTYPE=(
   [accelerate-llvm]="7"
-  [accelerate-llvm-sharded]="2"
+  [accelerate-llvm-decoupled-lookback]="2"
+  [accelerate-llvm-decoupled-half-sized]="4"
 )
 
 CRITERION_FLAGS=""
 
 # Thread counts to benchmark
-THREAD_COUNTS=(1 4 8 12 16 20 24 28 32)
-# THREAD_COUNTS=(1 3 6)
+# THREAD_COUNTS=(1 4 8 12 16 20 24 28 32)
+THREAD_COUNTS=(1 3 6)
 
 parse_flags() {
     TIMER_FALLBACK=""
@@ -146,6 +149,7 @@ bench() {
       # Create temp stack.yaml
       create_temp_stack_yaml "$pkg" "$path" "$extra_packages" "$extra_deps" "$extra_flags" "$@" > temp-stack.yaml
 
+      # Change this to size mayhaps instead of threadss
       for threads in "${THREAD_COUNTS[@]}"; do
         if [ "$RESUME" = true ] && [ -f "results/results-$name-$threads.csv" ]; then
           echo "Skipping $name with $threads threads, already exists"
@@ -158,7 +162,7 @@ bench() {
         temp_result_file=$(mktemp "/tmp/results-$name-$threads.XXXXXX.csv")
         result_file="results/results-$name-$threads.csv"
 
-        # Set thread count and run benchmark
+        # Set thread count and run benchmark, change this cmd to use size or smth
         export ACCELERATE_LLVM_NATIVE_THREADS=$threads
         if STACK_YAML=temp-stack.yaml stack run "$bench_name" -- --csv "$temp_result_file" $criterion_flags $CRITERION_FLAGS; then
           mv "$temp_result_file" "$result_file"
